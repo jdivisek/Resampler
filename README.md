@@ -8,9 +8,25 @@ The function is built on the highly optimized [`data.table`](https://github.com/
 
 ![](man/figures/data.table_logo.png)
 
+## Installation
+
+You can install the development version of `Resampler` directly from GitHub by running the following code in your R console:
+
+```{r}
+# Install devtools if you don't have it yet
+if (!requireNamespace("devtools", quietly = TRUE)) {
+  install.packages("devtools")
+}
+
+# Install and load Resampler
+library(devtools)
+install_github("jdivisek/Resampler")
+library(Resampler)
+```
+
 ## Data Requirements
 
-The function requires two input data objects in `data.table` format.
+The `resample_plots` function requires two input data objects in `data.table` format.
 
 1.  `coord`
 
