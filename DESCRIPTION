@@ -2,7 +2,7 @@ Package: Resampler
 Title: Distance and Similarity-Based Resampling of Vegetation Plots
 Version: 2026.02.07-001
 Authors@R: person("Jan", "Divíšek", role = c("aut", "cre"), email = "divisekjan@sci.muni.cz")
-Description: This package contains a single function, resample_plots, which performs resampling (thinning) of vegetation plots (sometimes called relevés in vegetation science) based on a combination of geographic proximity and species composition similarity. The goal is to reduce sampling density in areas where many plots are located close to each other and record very similar or identical vegetation.
+Description: This package contains a single function, resample_plots, which performs the resampling (thinning) of vegetation plots (sometimes called relevés in vegetation science) based on a combination of geographic proximity and species composition similarity. The goal is to reduce sampling density in areas where many plots are located close to each other and record very similar or identical vegetation.
 License: GPL (>= 3)
 Encoding: UTF-8
 LazyData: true
