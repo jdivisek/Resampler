@@ -1,4 +1,4 @@
-# `Resampler`: Technical Description of the Package
+# `Resampler`: Distance and Similarity-Based Resampling of Vegetation Plots
 
 The `Resampler` package contains a single function, `resample_plots`, which performs the resampling (thinning) of vegetation plots based on a combination of geographic proximity and species composition similarity. The goal is to reduce sampling density in areas where many plots are located close to each other and record very similar or indentical vegetation.
 
