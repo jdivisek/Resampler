@@ -13,14 +13,14 @@ The function is built on the highly optimized [`data.table`](https://github.com/
 You can install the development version of `Resampler` directly from GitHub by running the following code in your R console:
 
 ```{r}
-# Install devtools if you don't have it yet
-if (!requireNamespace("devtools", quietly = TRUE)) {
-  install.packages("devtools")
+# Install remotes if you don't have it yet
+if (!requireNamespace("remotes", quietly = TRUE)) {
+  install.packages("remotes")
 }
 
 # Install and load Resampler
-library(devtools)
-install_github("jdivisek/Resampler")
+library(remotes)
+remotes::install_github("jdivisek/Resampler")
 library(Resampler)
 ```
 
