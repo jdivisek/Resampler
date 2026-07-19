@@ -8,7 +8,7 @@ filtering_task <- function(spec_sub, d, sim.threshold, sim.method){
                                    x = spec_sub$cover,
                                    dimnames = list(names(d_sub), levels(factor(spec_sub$Taxon_name))))
 
-  ds <- lapply(d_sub, FUN = calc_sim, spec_sub, sim.threshold, sim.method)
+  ds <- lapply(d_sub, FUN = calc_sim, spec_sub, sim.method)
 
   pairs <- rbindlist(lapply(names(ds), function(p1) {
     p2 <- ds[[p1]][ds[[p1]] > sim.threshold & as.integer(names(ds[[p1]])) > as.integer(p1)]

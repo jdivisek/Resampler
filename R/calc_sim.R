@@ -1,5 +1,5 @@
 #' @noRd
-calc_sim <- function(plots, spec_sub, sim.threshold, sim.method){
+calc_sim <- function(plots, spec_sub, sim.method){
 
   n <- length(plots)-1
 
