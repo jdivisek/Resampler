@@ -1,5 +1,7 @@
 #' @noRd
-filtering_task <- function(spec_sub, d, sim.threshold, sim.method){
+filtering_task <- function(spec_sub, d, sim.threshold, sim.method, inclusive){
+
+  op <- if(inclusive) `>=` else `>`
 
   d_sub <- d[names(d) %chin% as.character(unique(spec_sub$id))]
 
@@ -11,7 +13,7 @@ filtering_task <- function(spec_sub, d, sim.threshold, sim.method){
   ds <- lapply(d_sub, FUN = calc_sim, spec_sub, sim.method)
 
   pairs <- rbindlist(lapply(names(ds), function(p1) {
-    p2 <- ds[[p1]][ds[[p1]] > sim.threshold & as.integer(names(ds[[p1]])) > as.integer(p1)]
+    p2 <- ds[[p1]][op(ds[[p1]], sim.threshold) & as.integer(names(ds[[p1]])) > as.integer(p1)]
     if (length(p2) == 0) return(NULL)
     data.table(p1 = p1, p2 = names(p2), sim = p2) }))
 

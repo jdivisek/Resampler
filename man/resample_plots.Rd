@@ -10,6 +10,7 @@ resample_plots(
   longlat = FALSE,
   dist.threshold = 1000,
   sim.threshold = 0.8,
+  inclusive = FALSE,
   sim.method = c("simpson", "sorensen", "jaccard", "bray"),
   remove = c("random", "less diverse", "more diverse", "lower var.value",
     "higher var.value"),
@@ -34,8 +35,8 @@ resample_plots(
 \item \code{cover} The species cover value (usually in \%). Must be of type numeric and must not contain any NA and zero values.
 }}
 
-\item{longlat}{A logical value (TRUE/FALSE). If TRUE, coordinates are treated
-as latitude/longitude, and distances are calculated in kilometers. If FALSE
+\item{longlat}{A logical value. If \code{TRUE}, coordinates are treated
+as latitude/longitude, and distances are calculated in kilometers. If \code{FALSE}
 (default), a projected coordinate system (e.g., UTM) is assumed, and
 distances are in meters.}
 
@@ -45,8 +46,20 @@ also meet the \code{sim.threshold}). Units (meters/kilometers) depend on the
 \code{longlat} parameter. Default is 1000.}
 
 \item{sim.threshold}{A numeric value (0-1). The threshold for species
-composition similarity. From a pair of plots more similar than this value,
+composition similarity. From a pair of plots meeting this threshold,
 one will be removed (if they also meet the \code{dist.threshold}). Default is 0.8.}
+
+\item{inclusive}{Logical. Should the similarity threshold (\code{sim.threshold})
+be inclusive? If \code{TRUE}, plots with a similarity greater than or
+equal to (\code{>=}) the threshold are considered for resampling. If \code{FALSE}
+(default), a strict inequality (\code{>}) is used. The combination of \code{sim.threshold}
+and \code{inclusive} parameters can be used to specify the behavior of the function
+in specific situations. For example, if \code{sim.threshold = 0} and \code{inclusive = TRUE},
+no plots will remain within the specified neighborhood. If \code{sim.threshold = 0}
+and \code{inclusive = FALSE}, only completely dissimilar plots may remain within
+the specified neighborhood. If \code{sim.threshold = 1} and \code{inclusive = TRUE},
+only pairs of identical plots will be resampled. If \code{sim.threshold = 1}
+and \code{inclusive = FALSE}, no plots will be resampled.}
 
 \item{sim.method}{The method for calculating similarity. Options: "simpson"
 (Simpson), "sorensen" (Sørensen), "jaccard" (Jaccard) and "bray"

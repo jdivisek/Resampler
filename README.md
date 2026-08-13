@@ -72,11 +72,13 @@ The `resample_plots` function requires two input data objects in `data.table` fo
 
 - `longlat`: A logical value (`TRUE`/`FALSE`). If `TRUE`, coordinates are treated as latitude/longitude, and distances are calculated in kilometers. If `FALSE` (default), a projected coordinate system (e.g., UTM) is assumed, and distances are in meters.
 
-- `dist.threshold`: A numeric value. The threshold for geographic distance. From a pair of plots closer than this value, one will be removed (if they also meet the `sim.threshold`). Units (meters/kilometers) depend on the `longlat` parameter. Default is `1000`.
+- `dist.threshold`: A numeric value. The threshold for geographic distance. From a pair of plots closer than this value, one will be removed (if they also meet the `sim.threshold`). Units (meters/kilometers) depend on the `longlat` parameter. Default is `1000` meters.
 
-- `sim.threshold`: A numeric value (0-1). The threshold for species composition similarity. From a pair of plots more similar than this value, one will be removed (if they also meet the `dist.threshold`). Default is `0.8`.
+- `sim.threshold`: A numeric value (0-1). The threshold for species composition similarity. From a pair of plots meeting this threshold, one will be removed (if they also meet the `dist.threshold`). Default is `0.8`.
 
-- `sim.method`: The method for calculating similarity. Options: `"bray"` (Bray-Curtis), `"simpson"` (Simpson), `"sorensen"` (Sørensen), `"jaccard"` (Jaccard). For all methods except `"bray"`, cover data is automatically converted to presence/absence.
+- `inclusive`: Logical. Should the similarity threshold (`sim.threshold`) be inclusive? If `TRUE`, plots with a similarity greater than or equal to (`>=`) the threshold are considered for resampling. If `FALSE` (default), a strict inequality (`>`) is used. The combination of `sim.threshold` and `inclusive` parameters can be used to specify the behavior of the function in specific situations. For example, if `sim.threshold = 0` and `inclusive = TRUE`, no plots will remain within the specified neighborhood. If `sim.threshold = 0` and `inclusive = FALSE`, only completely dissimilar plots may remain within the specified neighborhood. If `sim.threshold = 1` and `inclusive = TRUE`, only pairs of identical plots will be resampled. If `sim.threshold = 1` and `inclusive = FALSE`, no plots will be resampled.
+
+- `sim.method`: The method for calculating similarity. Options: `"simpson"` (Simpson), `"sorensen"` (Sørensen), `"jaccard"` (Jaccard) and `"bray"` (Bray-Curtis). Default is `"simpson"`. For all methods except `"bray"`, cover data is automatically converted to presence/absence.
 
 - `remove`: The rule that decides which plot from a conflicting pair will be removed. Default is `"random"`.
 
@@ -118,7 +120,7 @@ The function operates in the following steps:
 
 5.  **Resampling:** The actual resampling process is performed for each group individually.
 
-    - For the given group, similarity between neighboring plots is calculated and a list of all unique pairs of plots that are both geographically close (i.e. neighboring) and exceed the similarity threshold is created.
+    - For the given group, similarity between neighboring plots is calculated and a list of all unique pairs of plots that are both geographically close and compositionaly similar is created.
 
     - This list of "conflicting" pairs is sorted in descending order based on their compositional similarity.
 
