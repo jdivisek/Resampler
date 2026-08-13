@@ -134,6 +134,7 @@ resample_plots <- function(coord, spec, longlat = FALSE, dist.threshold = 1000,
   if(any(is.na(coord[, 2:3]))) stop("Error: Coordinates contain NA values")
   if(remove %chin% c("lower var.value", "higher var.value") && (is.null(var.value) || !var.value %chin% colnames(coord))) stop("Error: Invalid or missing var.value")
   if(!is.null(strata) && !strata %chin% colnames(coord)) stop("Error: Invalid strata column name")
+  if(ncol(spec) > 3) stop("Error: 'spec' should contain only three columns: PlotObservationID, Taxon_name and cover")
   if(!all(c("PlotObservationID", "Taxon_name", "cover") %chin% colnames(spec))) stop("Error: Check column names in 'spec'")
   if(any(spec$cover == 0)) stop("Error: Zero covers not allowed")
   if(any(is.na(spec$cover))) stop("Error: NAs in cover")
@@ -151,22 +152,20 @@ resample_plots <- function(coord, spec, longlat = FALSE, dist.threshold = 1000,
   coord <- coord[sample(1:nrow(coord)), ]
 
   if(remove == "less diverse"){
-    coord <- coord[spec[, .(.N), by = .(PlotObservationID)], on = c("PlotObservationID")][order(N)]}
+    coord <- coord[order(spec[, .N, by = PlotObservationID][coord, x.N, on = "PlotObservationID"], decreasing = FALSE, na.last = FALSE)]}
   if(remove == "more diverse"){
-    coord <- coord[spec[, .(.N), by = .(PlotObservationID)], on = c("PlotObservationID")][order(-N)]}
+    coord <- coord[order(spec[, .N, by = PlotObservationID][coord, x.N, on = "PlotObservationID"], decreasing = TRUE, na.last = FALSE)]}
   if(remove == "lower var.value"){
-    coord <- setorderv(coord, var.value, 1, na.last=FALSE)}
+    coord <- coord[order(get(var.value), decreasing = FALSE, na.last = FALSE)]}
   if(remove == "higher var.value"){
-    coord <- setorderv(coord, var.value, -1, na.last=FALSE)}
-
-  if (sim.method != "bray") { spec[, cover := 1] }
+    coord <- coord[order(get(var.value), decreasing = TRUE, na.last = FALSE)]}
 
   # --- 3. Indentification of neighbouring plots ---
   if (!is.null(strata)) {
     cat(paste("Searching for neighbouring plots within", uniqueN(coord[[strata]]), "strata:\n"))
     coord[, (strata) := as.character(.SD[[1]]), .SDcols = strata]
 
-    coord <- setorderv(coord, strata, 1, na.last=FALSE)
+    coord <- coord[order(get(strata), decreasing = FALSE, na.last = FALSE)]
 
     pb <- txtProgressBar(min = 0, max = uniqueN(coord[[strata]]), style = 3)
     d <- coord[, {setTxtProgressBar(pb, .GRP);
@@ -182,24 +181,26 @@ resample_plots <- function(coord, spec, longlat = FALSE, dist.threshold = 1000,
   }
 
   ##set new ids based on ordered coord
-  spec[coord[, .(.I, PlotObservationID)], on = "PlotObservationID", id := i.I]
+  spec[coord[, .(.I, PlotObservationID)], on = "PlotObservationID", temp_id := i.I]
+  on.exit(set(spec, j = "temp_id", value = NULL), add = TRUE)
 
   # --- 4. Split plots to groups ---
   g <- igraph::components(igraph::graph_from_adj_list(d, mode = "all"))
 
-  spec[data.table(id = coord[,.I], group = g$membership), on = "id", grp := group]
-  spec <- spec[grp %in% which(g$csize > 1), ]
+  spec[data.table(temp_id = coord[,.I], group = g$membership), on = "temp_id", temp_grp := group]
+  on.exit(set(spec, j = "temp_grp", value = NULL), add = TRUE)
+  spec[temp_grp %in% which(g$csize == 1), temp_grp := NA]
 
   d <- mapply(append, seq_along(d), d, SIMPLIFY = FALSE, USE.NAMES = FALSE)
   names(d) <- coord[,.I]
   d <- d[g$membership %in% which(g$csize > 1)]
 
   cat("Similarity-based resampling:\n")
-  pb <- txtProgressBar(min = 0, max = uniqueN(spec$grp), style = 3)
-  blacklist <-  spec[, {setTxtProgressBar(pb, .GRP);
+  pb <- txtProgressBar(min = 0, max = uniqueN(spec$temp_grp, na.rm = TRUE), style = 3)
+  blacklist <-  spec[!is.na(temp_grp), {setTxtProgressBar(pb, .GRP);
     filtering_task(.SD, d, sim.threshold, sim.method, inclusive)},
-    by = .(grp),
-    .SDcols = PlotObservationID:grp]
+    by = .(temp_grp),
+    .SDcols = PlotObservationID:temp_grp]
 
   close(pb)
 

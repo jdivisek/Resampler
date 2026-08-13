@@ -3,9 +3,9 @@ filtering_task <- function(spec_sub, d, sim.threshold, sim.method, inclusive){
 
   op <- if(inclusive) `>=` else `>`
 
-  d_sub <- d[names(d) %chin% as.character(unique(spec_sub$id))]
+  d_sub <- d[names(d) %chin% as.character(unique(spec_sub$temp_id))]
 
-  spec_sub <- Matrix::sparseMatrix(i = as.integer(factor(spec_sub$id), levels = names(d_sub)),
+  spec_sub <- Matrix::sparseMatrix(i = as.integer(factor(spec_sub$temp_id), levels = names(d_sub)),
                                    j = as.integer(factor(spec_sub$Taxon_name)),
                                    x = spec_sub$cover,
                                    dimnames = list(names(d_sub), levels(factor(spec_sub$Taxon_name))))
@@ -18,7 +18,7 @@ filtering_task <- function(spec_sub, d, sim.threshold, sim.method, inclusive){
     data.table(p1 = p1, p2 = names(p2), sim = p2) }))
 
   if(nrow(pairs) > 0){
-    pairs <- setorderv(pairs, c("sim"), c(-1))
+    setorderv(pairs, c("sim"), c(-1))
 
     black <- NULL
     repeat
