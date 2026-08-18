@@ -167,12 +167,13 @@ resample_plots <- function(coord, spec, longlat = FALSE, dist.threshold = 1000,
 
     coord <- coord[order(get(strata), decreasing = FALSE, na.last = FALSE)]
 
-    pb <- txtProgressBar(min = 0, max = uniqueN(coord[[strata]]), style = 3)
-    d <- coord[, {setTxtProgressBar(pb, .GRP);
+    pb_id <- cli::cli_progress_bar("Searching for neighbouring plots within strata", total = uniqueN(coord[[strata]]))
+    d <- coord[, {
+      cli::cli_progress_update(id = pb_id)
       data.table(NB = dnearneigh_strat(x = as.matrix(.SD), row.names = .I,
                                        d1 = 0, d2 = dist.threshold, longlat = longlat))},
       by = strata, .SDcols = 2:3]
-    close(pb)
+    cli::cli_progress_done(id = pb_id)
 
     d <- d$NB
   } else {
@@ -195,14 +196,16 @@ resample_plots <- function(coord, spec, longlat = FALSE, dist.threshold = 1000,
   names(d) <- coord[,.I]
   d <- d[g$membership %in% which(g$csize > 1)]
 
-  cat("Similarity-based resampling:\n")
-  pb <- txtProgressBar(min = 0, max = uniqueN(spec$temp_grp, na.rm = TRUE), style = 3)
-  blacklist <-  spec[!is.na(temp_grp), {setTxtProgressBar(pb, .GRP);
+  ##resampling with 'cli' progressbar
+  pb_id <- cli::cli_progress_bar("Similarity-based resampling", total = uniqueN(spec$temp_grp, na.rm = TRUE))
+
+  blacklist <- spec[!is.na(temp_grp), {
+    cli::cli_progress_update(id = pb_id)
     filtering_task(.SD, d, sim.threshold, sim.method, inclusive)},
     by = .(temp_grp),
     .SDcols = PlotObservationID:temp_grp]
 
-  close(pb)
+  cli::cli_progress_done(id = pb_id)
 
   # --- 5. Return selected plots ---
 
