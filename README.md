@@ -1,12 +1,14 @@
-# `Resampler`: Distance and Similarity-Based Resampling of Vegetation Plots
++----------------------------------------+-----------------------------------------------------------------------------+
+|                                        |                                                                             |
++========================================+=============================================================================+
+| ![](man/figures/logo.png){width="165"} | # `Resampler`: Distance and Similarity-Based Resampling of Vegetation Plots |
++----------------------------------------+-----------------------------------------------------------------------------+
 
 The `Resampler` package contains a single function, `resample_plots`, which performs the resampling (thinning) of vegetation plots based on a combination of geographic proximity and species composition similarity. The goal is to reduce sampling density in areas where many plots are located close to each other and record very similar or indentical vegetation.
 
 The plot removal process is iterative: the function first identifies the most similar pair of plots within the specified distance, removes one of them based on a selected rule, and repeats this process until no pairs that violate the specified distance and similarity thresholds remain in the dataset.
 
 The function is built on the highly optimized [`data.table`](https://github.com/Rdatatable/data.table) package and enables processing of large datasets (thousands and lower hundreds of thousands of plots) even on standard hardware.
-
-![](man/figures/data.table_logo.png)
 
 ## Installation
 
