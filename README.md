@@ -1,4 +1,4 @@
-![](man/figures/logo.png){width="275"}
+![](man/figures/logo.png){width="200"}
 
 # `Resampler`: Distance and Similarity-Based Resampling of Vegetation Plots
 
