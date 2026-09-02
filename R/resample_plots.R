@@ -12,7 +12,7 @@
 #' A series of checks is performed to verify that the input data meet all requirements regarding format, type, and the absence of NA values.
 #'
 #' ### 2. Data Preparation and Sorting
-#'    * First, the `coord` table is sorted according to the rule defined in `remove`. For "random", the rows are randomly shuffled. For other methods, they are first randomly shuffled and then sorted by diversity or the value in `var.value` This serves as a universal tie-breaking rule in subsequent steps.
+#'    * First, the `coord` table is sorted according to the rule defined in `remove`. For "random", the rows are randomly shuffled. For other methods, they are first randomly shuffled and then sorted by diversity or the value in `decision.variable` This serves as a universal tie-breaking rule in subsequent steps.
 #'    * Based on this final order, a new, internal numeric identifier id (1, 2, 3...) is created and joined to the `spec` table. All further operations work with this id.
 #'
 #' ### 3. Neighbor Identification
@@ -39,7 +39,7 @@
 #'
 #' The function was tested with a dataset containing 468,341 grassland vegetation
 #' plots from the European Vegetation Archive using the following settings:
-#' `longlat = FALSE`, `dist.threshold = 1000`, `sim.threshold = 0.8`,
+#' `longlat = FALSE`, `dist.threshold = 1000`, `sim.threshold = 0.8`, `inclusive = "FALSE"`,
 #' `sim.method = "simpson"`, `remove = "random"`, and `strata = NULL`.
 #' On an older PC with 8 GB RAM and an Intel Core i5-9400F 2.8 GHz processor,
 #' resampling took 20 hours and 53 minutes without any memory issues. Therefore,
@@ -47,10 +47,11 @@
 #'
 #' The function was also tested with a smaller dataset of 114,854 plots from
 #' the Czech Vegetation Database using the following settings: `longlat = FALSE`,
-#' `dist.threshold = 1000`, `sim.threshold = 0.5`, `sim.method = "simpson"`,
-#' `remove = "random"`, and `strata = NULL`. On a laptop with 32 GB RAM
-#' and an Intel Core i7-11850H 2.5 GHz processor, the resampling procedure took 8 minutes.
-#' When using environmental strata, the resampling took less than 3 minutes.
+#' `dist.threshold = 1000`, `sim.threshold = 0.5`, `inclusive = "FALSE"`,
+#' `sim.method = "simpson"`, `remove = "random"`, and `strata = NULL`.
+#' On a laptop with 32 GB RAM and an Intel Core i7-11850H 2.5 GHz processor,
+#' the resampling procedure took 8 minutes.When using environmental strata, it
+#' took 3 minutes.
 #'
 #' @section Warning:
 #' `coord` and `spec` tables must have the structure and column names described in the Arguments section!
@@ -59,7 +60,7 @@
 #'    * `PlotObservationID` A unique identifier for each plot (numeric, integer or character). Each PlotObservationID must be unique.
 #'    * X-coordinate or Longitude. Must be of type numeric and must not contain any NA values.
 #'    * Y-coordinate or Latitude. Must be of type numeric and must not contain any NA values.
-#'    * Other optional column(s) containing, for example, environmental strata and/or a variable used for selecting vegetation plots (see `var.value` parameter)
+#'    * Other optional column(s) containing, for example, environmental strata and/or a variable used for selecting vegetation plots (see `decision.variable` parameter)
 #' @param spec `data.table` containing vegetation-composition data in "long format". Required columns are:
 #'    * `PlotObservationID` The plot identifier, which corresponds to the IDs in `coord`.
 #'    * `Taxon_name` The name of the recorded taxon (species).
@@ -92,13 +93,13 @@
 #' converted to presence/absence. If only "presences" are provided (i.e. all
 #' cover values are 1) and `sim.method = "bray"`, Sørensen index is calculated.
 #' @param remove The rule that decides which plot from a conflicting pair will be removed. Default is "random".
-#'    * `random` Randomly removes one of the two plots.
-#'    * `less diverse` Removes the plot with the lower number of richness. Ties are broken by "random" order.
-#'    * `more diverse` Removes the plot with the higher number of species. Ties are broken by "random" order.
-#'    * `lower var.value` Removes the plot with the lower value in the column defined by the var.value parameter. NAs are allowed and plots with NA are removed first.
-#'    * `higher var.value` Removes the plot with the higher value in the column defined by the var.value parameter. NAs are allowed and plots with NA are removed first.
-#' @param var.value A character string. The name of a column in `coord` used for
-#' decision-making with the "lower var.value" and "higher var.value" methods.
+#'    * `"random"` Randomly removes one of the two plots.
+#'    * `"less diverse"` Removes the plot with the lower number of richness. Ties are broken by "random" order.
+#'    * `"more diverse"` Removes the plot with the higher number of species. Ties are broken by "random" order.
+#'    * `"lower value"` Removes the plot with the lower value in the column defined by the decision.variable parameter. NAs are allowed and plots with NA are removed first.
+#'    * `"higher value"` Removes the plot with the higher value in the column defined by the decision.variable parameter. NAs are allowed and plots with NA are removed first.
+#' @param decision.variable A character string. The name of a column in `coord` used for
+#' decision-making with the "lower value" and "higher value" methods.
 #' NAs are allowed in this variable and plots with NA are removed first.
 #' @param strata A character string. The name of a column in `coord` that defines
 #' plot stratification. If provided, resampling is performed separately within
@@ -118,8 +119,8 @@
 resample_plots <- function(coord, spec, longlat = FALSE, dist.threshold = 1000,
                            sim.threshold = 0.8, inclusive = FALSE,
                            sim.method = c("simpson", "sorensen", "jaccard", "bray"),
-                           remove = c("random", "less diverse", "more diverse", "lower var.value", "higher var.value"),
-                           var.value = NULL, strata = NULL, seed = 1234) {
+                           remove = c("random", "less diverse", "more diverse", "lower value", "higher value"),
+                           decision.variable = NULL, strata = NULL, seed = 1234) {
 
   start_time <- Sys.time()
 
@@ -132,7 +133,7 @@ resample_plots <- function(coord, spec, longlat = FALSE, dist.threshold = 1000,
   if(ncol(coord) < 3) stop("Error: 'coord' must contain at least three columns (PlotObservationID, X coordinate, Y coordinate)")
   if(!all(sapply(coord[, 2:3], is.numeric))) stop("Error: Coordinates (X, Y or Lon, Lat) must be numeric")
   if(any(is.na(coord[, 2:3]))) stop("Error: Coordinates contain NA values")
-  if(remove %chin% c("lower var.value", "higher var.value") && (is.null(var.value) || !var.value %chin% colnames(coord))) stop("Error: Invalid or missing var.value")
+  if(remove %chin% c("lower value", "higher value") && (is.null(decision.variable) || !decision.variable %chin% colnames(coord))) stop("Error: Invalid or missing decision.variable")
   if(!is.null(strata) && !strata %chin% colnames(coord)) stop("Error: Invalid strata column name")
   if(ncol(spec) > 3) stop("Error: 'spec' should contain only three columns: PlotObservationID, Taxon_name and cover")
   if(!all(c("PlotObservationID", "Taxon_name", "cover") %chin% colnames(spec))) stop("Error: Check column names in 'spec'")
@@ -155,10 +156,10 @@ resample_plots <- function(coord, spec, longlat = FALSE, dist.threshold = 1000,
     coord <- coord[order(spec[, .N, by = PlotObservationID][coord, x.N, on = "PlotObservationID"], decreasing = FALSE, na.last = FALSE)]}
   if(remove == "more diverse"){
     coord <- coord[order(spec[, .N, by = PlotObservationID][coord, x.N, on = "PlotObservationID"], decreasing = TRUE, na.last = FALSE)]}
-  if(remove == "lower var.value"){
-    coord <- coord[order(get(var.value), decreasing = FALSE, na.last = FALSE)]}
-  if(remove == "higher var.value"){
-    coord <- coord[order(get(var.value), decreasing = TRUE, na.last = FALSE)]}
+  if(remove == "lower value"){
+    coord <- coord[order(get(decision.variable), decreasing = FALSE, na.last = FALSE)]}
+  if(remove == "higher value"){
+    coord <- coord[order(get(decision.variable), decreasing = TRUE, na.last = FALSE)]}
 
   # --- 3. Indentification of neighbouring plots ---
   if (!is.null(strata)) {

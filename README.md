@@ -88,11 +88,11 @@ The `resample_plots` function requires two input data objects in `data.table` fo
 
   - `"more diverse"`: Removes the plot with the higher number of species. Ties are broken by `"random"` order.
 
-  - `"lower var.value"`: Removes the plot with the lower value in the column defined by the `var.value` parameter. `NAs` are allowed and plots with `NA` are removed first.
+  - `"lower value"`: Removes the plot with the lower value in the column defined by the `decision.variable` parameter. `NAs` are allowed and plots with `NA` are removed first.
 
-  - `"higher var.value"`: Removes the plot with the higher value in the column defined by the `var.value` parameter. `NAs` are allowed and plots with `NA` are removed first.
+  - `"higher value"`: Removes the plot with the higher value in the column defined by the `decision.variable` parameter. `NAs` are allowed and plots with `NA` are removed first.
 
-- `var.value`: A character string. The name of a column in `coord` used for decision-making with the `"lower var.value"` and `"higher var.value"` methods. `NAs` are allowed in this variable and plots with `NA` are removed first.
+- `decision.variable`: A character string. The name of a column in `coord` used for decision-making with the `"lower value"` and `"higher value"` methods. `NAs` are allowed in this variable and plots with `NA` are removed first.
 
 - `strata`: A character string. The name of a column in `coord` that defines plot stratification. If provided, resampling is performed separately within each stratum (group).
 
@@ -106,7 +106,7 @@ The function operates in the following steps:
 
 2.  **Data Preparation and Sorting:** This key step ensures reproducibility and efficiency.
 
-    - First, the `coord` data.table is sorted according to the rule defined in `remove`. For `"random"`, the rows are randomly shuffled. For other methods, they first randomly shuffled and then sorted by diversity or the value in `var.value`. This serves as a **universal tie-breaking rule** in subsequent steps.
+    - First, the `coord` data.table is sorted according to the rule defined in `remove`. For `"random"`, the rows are randomly shuffled. For other methods, they first randomly shuffled and then sorted by diversity or the value in `decision.variable`. This serves as a **universal tie-breaking rule** in subsequent steps.
 
     - Based on this final order, a new, internal numeric identifier `id` (1, 2, 3...) is created and joined to the `spec` table. All further operations work with this `id`.
 
@@ -146,8 +146,8 @@ The function can process very large datasets (lower hundreds of thousands of plo
 
 - `longlat`. Although the `spdep::dnearneigh` function, which is used to identify neighboring plots, can handle geographical coordinates in degrees, it is highly recommended to provide coordinates in a projected coordinate system such as ETRS89 and set `longlat = FALSE`. In this case, the function uses Euclidean distance instead of Great Circle distance, which speeds up the identification of neighboring plots.
 
-The function was tested with a dataset containing 468,341 grassland vegetation plots from the [European Vegetation Archive](https://euroveg.org/eva-database/) using the following settings: `longlat = FALSE`, `dist.threshold = 1000`, `sim.threshold = 0.8`, `sim.method = "simpson"`, `remove = "random"`, and `strata = NULL`. On an older PC with 8 GB RAM and an Intel Core i5-9400F 2.8 GHz processor, resampling took 20 hours and 53 minutes without any memory issues. Therefore, you should be patient😉. The resampling removed 30.9% of plots (144,860 out of 468,341).
+The function was tested with a dataset containing 468,341 grassland vegetation plots from the [European Vegetation Archive](https://euroveg.org/eva-database/) using the following settings: `longlat = FALSE`, `dist.threshold = 1000`, `sim.threshold = 0.8`, `inclusive = FALSE`, `sim.method = "simpson"`, `remove = "random"`, and `strata = NULL`. On an older PC with 8 GB RAM and an Intel Core i5-9400F 2.8 GHz processor, resampling took 20 hours and 53 minutes without any memory issues. Therefore, you should be patient😉. The resampling removed 30.9% of plots (144,860 out of 468,341).
 
-The function was also tested with a smaller dataset of 114,854 plots from the [Czech Vegetation Database](https://czechveg.github.io/) using the following settings: `longlat = FALSE`, `dist.threshold = 1000`, `sim.threshold = 0.5`, `sim.method = "simpson"`, `remove = "random"`, and `strata = NULL`. On a laptop with 32 GB RAM and an Intel Core i7-11850H 2.5 GHz processor, the resampling procedure took 8 minutes. When using environmental strata, the resampling took less than 3 minutes.
+The function was also tested with a smaller dataset of 116,148 plots from the [Czech Vegetation Database](https://czechveg.github.io/) using the following settings: `longlat = FALSE`, `dist.threshold = 1000`, `sim.threshold = 0.6`, `inclusive = FALSE`, `sim.method = "simpson"`, `remove = "random"`, and `strata = NULL`. On a laptop with 32 GB RAM and an Intel Core i7-11850H 2.5 GHz processor, the resampling procedure took 8 minutes. When using environmental strata, it took only 3 minutes.
 
 Although faster implementations of this resampling procedure in R are certainly possible, especially for small datasets, they require calculating pairwise similarity matrices, which becomes very memory-demanding and inefficient with large datasets.

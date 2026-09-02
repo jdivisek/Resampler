@@ -12,9 +12,8 @@ resample_plots(
   sim.threshold = 0.8,
   inclusive = FALSE,
   sim.method = c("simpson", "sorensen", "jaccard", "bray"),
-  remove = c("random", "less diverse", "more diverse", "lower var.value",
-    "higher var.value"),
-  var.value = NULL,
+  remove = c("random", "less diverse", "more diverse", "lower value", "higher value"),
+  decision.variable = NULL,
   strata = NULL,
   seed = 1234
 )
@@ -25,7 +24,7 @@ resample_plots(
 \item \code{PlotObservationID} A unique identifier for each plot (numeric, integer or character). Each PlotObservationID must be unique.
 \item X-coordinate or Longitude. Must be of type numeric and must not contain any NA values.
 \item Y-coordinate or Latitude. Must be of type numeric and must not contain any NA values.
-\item Other optional column(s) containing, for example, environmental strata and/or a variable used for selecting vegetation plots (see \code{var.value} parameter)
+\item Other optional column(s) containing, for example, environmental strata and/or a variable used for selecting vegetation plots (see \code{decision.variable} parameter)
 }}
 
 \item{spec}{\code{data.table} containing vegetation-composition data in "long format". Required columns are:
@@ -69,15 +68,15 @@ cover values are 1) and \code{sim.method = "bray"}, Sørensen index is calculate
 
 \item{remove}{The rule that decides which plot from a conflicting pair will be removed. Default is "random".
 \itemize{
-\item \code{random} Randomly removes one of the two plots.
-\item \verb{less diverse} Removes the plot with the lower number of richness. Ties are broken by "random" order.
-\item \verb{more diverse} Removes the plot with the higher number of species. Ties are broken by "random" order.
-\item \verb{lower var.value} Removes the plot with the lower value in the column defined by the var.value parameter. NAs are allowed and plots with NA are removed first.
-\item \verb{higher var.value} Removes the plot with the higher value in the column defined by the var.value parameter. NAs are allowed and plots with NA are removed first.
+\item \code{"random"} Randomly removes one of the two plots.
+\item \code{"less diverse"} Removes the plot with the lower number of richness. Ties are broken by "random" order.
+\item \code{"more diverse"} Removes the plot with the higher number of species. Ties are broken by "random" order.
+\item \code{"lower value"} Removes the plot with the lower value in the column defined by the decision.variable parameter. NAs are allowed and plots with NA are removed first.
+\item \code{"higher value"} Removes the plot with the higher value in the column defined by the decision.variable parameter. NAs are allowed and plots with NA are removed first.
 }}
 
-\item{var.value}{A character string. The name of a column in \code{coord} used for
-decision-making with the "lower var.value" and "higher var.value" methods.
+\item{decision.variable}{A character string. The name of a column in \code{coord} used for
+decision-making with the "lower value" and "higher value" methods.
 NAs are allowed in this variable and plots with NA are removed first.}
 
 \item{strata}{A character string. The name of a column in \code{coord} that defines
@@ -105,7 +104,7 @@ A series of checks is performed to verify that the input data meet all requireme
 
 \subsection{2. Data Preparation and Sorting}{
 \itemize{
-\item First, the \code{coord} table is sorted according to the rule defined in \code{remove}. For "random", the rows are randomly shuffled. For other methods, they are first randomly shuffled and then sorted by diversity or the value in \code{var.value} This serves as a universal tie-breaking rule in subsequent steps.
+\item First, the \code{coord} table is sorted according to the rule defined in \code{remove}. For "random", the rows are randomly shuffled. For other methods, they are first randomly shuffled and then sorted by diversity or the value in \code{decision.variable} This serves as a universal tie-breaking rule in subsequent steps.
 \item Based on this final order, a new, internal numeric identifier id (1, 2, 3...) is created and joined to the \code{spec} table. All further operations work with this id.
 }
 }
@@ -145,7 +144,7 @@ The function can process very large datasets (lower hundreds of thousands of plo
 
 The function was tested with a dataset containing 468,341 grassland vegetation
 plots from the European Vegetation Archive using the following settings:
-\code{longlat = FALSE}, \code{dist.threshold = 1000}, \code{sim.threshold = 0.8},
+\code{longlat = FALSE}, \code{dist.threshold = 1000}, \code{sim.threshold = 0.8}, \code{inclusive = "FALSE"},
 \code{sim.method = "simpson"}, \code{remove = "random"}, and \code{strata = NULL}.
 On an older PC with 8 GB RAM and an Intel Core i5-9400F 2.8 GHz processor,
 resampling took 20 hours and 53 minutes without any memory issues. Therefore,
@@ -153,10 +152,11 @@ you should be patient;-). The resampling removed 30.9\% of plots (144,860 out of
 
 The function was also tested with a smaller dataset of 114,854 plots from
 the Czech Vegetation Database using the following settings: \code{longlat = FALSE},
-\code{dist.threshold = 1000}, \code{sim.threshold = 0.5}, \code{sim.method = "simpson"},
-\code{remove = "random"}, and \code{strata = NULL}. On a laptop with 32 GB RAM
-and an Intel Core i7-11850H 2.5 GHz processor, the resampling procedure took 8 minutes.
-When using environmental strata, the resampling took less than 3 minutes.
+\code{dist.threshold = 1000}, \code{sim.threshold = 0.5}, \code{inclusive = "FALSE"},
+\code{sim.method = "simpson"}, \code{remove = "random"}, and \code{strata = NULL}.
+On a laptop with 32 GB RAM and an Intel Core i7-11850H 2.5 GHz processor,
+the resampling procedure took 8 minutes.When using environmental strata, it
+took 3 minutes.
 }
 }
 \section{Warning}{
