@@ -50,14 +50,14 @@
 #' `dist.threshold = 1000`, `sim.threshold = 0.5`, `inclusive = "FALSE"`,
 #' `sim.method = "simpson"`, `remove = "random"`, and `strata = NULL`.
 #' On a laptop with 32 GB RAM and an Intel Core i7-11850H 2.5 GHz processor,
-#' the resampling procedure took 8 minutes.When using environmental strata, it
+#' the resampling procedure took 8 minutes. When using environmental strata, it
 #' took 3 minutes.
 #'
 #' @section Warning:
 #' `coord` and `spec` tables must have the structure and column names described in the Arguments section!
 #'
 #' @param coord `data.table` with the following columns:
-#'    * `PlotObservationID` A unique identifier for each plot (numeric, integer or character). Each PlotObservationID must be unique.
+#'    * `PlotObservationID` A unique identifier for each plot (numeric, integer or character). Each `PlotObservationID` must be unique.
 #'    * X-coordinate or Longitude. Must be of type numeric and must not contain any NA values.
 #'    * Y-coordinate or Latitude. Must be of type numeric and must not contain any NA values.
 #'    * Other optional column(s) containing, for example, environmental strata and/or a variable used for selecting vegetation plots (see `decision.variable` parameter)
@@ -87,19 +87,19 @@
 #' the specified neighborhood. If `sim.threshold = 1` and `inclusive = TRUE`,
 #' only pairs of identical plots will be resampled. If `sim.threshold = 1`
 #' and `inclusive = FALSE`, no plots will be resampled.
-#' @param sim.method The method for calculating similarity. Options: "simpson"
-#' (Simpson), "sorensen" (Sørensen), "jaccard" (Jaccard) and "bray"
-#' (Bray-Curtis). Default is "simpson". For all methods except "bray", cover data is automatically
-#' converted to presence/absence. If only "presences" are provided (i.e. all
+#' @param sim.method The method for calculating similarity. Options: `"simpson"`
+#' (Simpson), `"sorensen"` (Sørensen), `"jaccard"` (Jaccard) and `"bray"`
+#' (Bray-Curtis). Default is `"simpson"`. For all methods except `"bray"`, cover data is automatically
+#' converted to presence/absence. If only presences are provided (i.e. all
 #' cover values are 1) and `sim.method = "bray"`, Sørensen index is calculated.
-#' @param remove The rule that decides which plot from a conflicting pair will be removed. Default is "random".
+#' @param remove The rule that decides which plot from a conflicting pair will be removed. Default is `"random"`.
 #'    * `"random"` Randomly removes one of the two plots.
-#'    * `"less diverse"` Removes the plot with the lower number of richness. Ties are broken by "random" order.
-#'    * `"more diverse"` Removes the plot with the higher number of species. Ties are broken by "random" order.
+#'    * `"less diverse"` Removes the plot with the lower number of richness. Ties are broken by `"random"` order.
+#'    * `"more diverse"` Removes the plot with the higher number of species. Ties are broken by `"random"` order.
 #'    * `"lower value"` Removes the plot with the lower value in the column defined by the decision.variable parameter. NAs are allowed and plots with NA are removed first.
 #'    * `"higher value"` Removes the plot with the higher value in the column defined by the decision.variable parameter. NAs are allowed and plots with NA are removed first.
 #' @param decision.variable A character string. The name of a column in `coord` used for
-#' decision-making with the "lower value" and "higher value" methods.
+#' decision-making with the `"lower value"` and `"higher value"` methods.
 #' NAs are allowed in this variable and plots with NA are removed first.
 #' @param strata A character string. The name of a column in `coord` that defines
 #' plot stratification. If provided, resampling is performed separately within

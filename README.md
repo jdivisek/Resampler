@@ -36,15 +36,15 @@ The `resample_plots` function requires two input data objects in `data.table` fo
 
       - `PlotObservationID`: A unique identifier for each plot. It can be numeric, integer or character.
 
-      - Second column: X-coordinate or Longitude. Must be of type numeric.
+      - Second column: X-coordinate or Longitude. Must be numeric and contain no `NA` values.
 
-      - Third column: Y-coordinate or Latitude. Must be of type numeric.
+      - Third column: Y-coordinate or Latitude. Must be numeric and contain no `NA` values.
 
-    - **Rules:**
+    - **Optional columns:**
 
-      - The coordinate columns must not contain any `NA` values.
+      - A variable used to decide which plot from a conflicting pair is removed (e.g. year of sampling for selecting younger plots). `NAs` are allowed and these plots are removed first.
 
-      - Each `PlotObservationID` must be unique.
+      - Environmental strata (e.g. landscape types). Each stratum is resampled separately.
 
 2.  `spec`
 
@@ -52,17 +52,11 @@ The `resample_plots` function requires two input data objects in `data.table` fo
 
     - **Required columns:**
 
-      - `PlotObservationID`: The plot identifier, which corresponds to the IDs in `coord`.
+      - `PlotObservationID`: The plot identifier, which corresponds to the IDs in `coord`. All `PlotObservationID` present in `spec` must also be present in `coord` (and vice versa).
 
       - `Taxon_name`: The name of the recorded taxon (species).
 
-      - `cover`: The species cover value (usually in %). Must be of type `numeric`.
-
-    - **Rules:**
-
-      - The `cover` column must not contain any `NA` and zero values.
-
-      - All `PlotObservationID` present in `spec` must also be present in `coord` (and vice versa).
+      - `cover`: The species cover value (usually in %). Must numeric and must not contain any `NA` and zero values.
 
 ## Function Parameter Descriptions
 

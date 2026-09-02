@@ -21,7 +21,7 @@ resample_plots(
 \arguments{
 \item{coord}{\code{data.table} with the following columns:
 \itemize{
-\item \code{PlotObservationID} A unique identifier for each plot (numeric, integer or character). Each PlotObservationID must be unique.
+\item \code{PlotObservationID} A unique identifier for each plot (numeric, integer or character). Each \code{PlotObservationID} must be unique.
 \item X-coordinate or Longitude. Must be of type numeric and must not contain any NA values.
 \item Y-coordinate or Latitude. Must be of type numeric and must not contain any NA values.
 \item Other optional column(s) containing, for example, environmental strata and/or a variable used for selecting vegetation plots (see \code{decision.variable} parameter)
@@ -60,23 +60,23 @@ the specified neighborhood. If \code{sim.threshold = 1} and \code{inclusive = TR
 only pairs of identical plots will be resampled. If \code{sim.threshold = 1}
 and \code{inclusive = FALSE}, no plots will be resampled.}
 
-\item{sim.method}{The method for calculating similarity. Options: "simpson"
-(Simpson), "sorensen" (Sørensen), "jaccard" (Jaccard) and "bray"
-(Bray-Curtis). Default is "simpson". For all methods except "bray", cover data is automatically
-converted to presence/absence. If only "presences" are provided (i.e. all
+\item{sim.method}{The method for calculating similarity. Options: \code{"simpson"}
+(Simpson), \code{"sorensen"} (Sørensen), \code{"jaccard"} (Jaccard) and \code{"bray"}
+(Bray-Curtis). Default is \code{"simpson"}. For all methods except \code{"bray"}, cover data is automatically
+converted to presence/absence. If only presences are provided (i.e. all
 cover values are 1) and \code{sim.method = "bray"}, Sørensen index is calculated.}
 
-\item{remove}{The rule that decides which plot from a conflicting pair will be removed. Default is "random".
+\item{remove}{The rule that decides which plot from a conflicting pair will be removed. Default is \code{"random"}.
 \itemize{
 \item \code{"random"} Randomly removes one of the two plots.
-\item \code{"less diverse"} Removes the plot with the lower number of richness. Ties are broken by "random" order.
-\item \code{"more diverse"} Removes the plot with the higher number of species. Ties are broken by "random" order.
+\item \code{"less diverse"} Removes the plot with the lower number of richness. Ties are broken by \code{"random"} order.
+\item \code{"more diverse"} Removes the plot with the higher number of species. Ties are broken by \code{"random"} order.
 \item \code{"lower value"} Removes the plot with the lower value in the column defined by the decision.variable parameter. NAs are allowed and plots with NA are removed first.
 \item \code{"higher value"} Removes the plot with the higher value in the column defined by the decision.variable parameter. NAs are allowed and plots with NA are removed first.
 }}
 
 \item{decision.variable}{A character string. The name of a column in \code{coord} used for
-decision-making with the "lower value" and "higher value" methods.
+decision-making with the \code{"lower value"} and \code{"higher value"} methods.
 NAs are allowed in this variable and plots with NA are removed first.}
 
 \item{strata}{A character string. The name of a column in \code{coord} that defines
@@ -155,7 +155,7 @@ the Czech Vegetation Database using the following settings: \code{longlat = FALS
 \code{dist.threshold = 1000}, \code{sim.threshold = 0.5}, \code{inclusive = "FALSE"},
 \code{sim.method = "simpson"}, \code{remove = "random"}, and \code{strata = NULL}.
 On a laptop with 32 GB RAM and an Intel Core i7-11850H 2.5 GHz processor,
-the resampling procedure took 8 minutes.When using environmental strata, it
+the resampling procedure took 8 minutes. When using environmental strata, it
 took 3 minutes.
 }
 }
