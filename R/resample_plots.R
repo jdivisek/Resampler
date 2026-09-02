@@ -163,7 +163,6 @@ resample_plots <- function(coord, spec, longlat = FALSE, dist.threshold = 1000,
 
   # --- 3. Indentification of neighbouring plots ---
   if (!is.null(strata)) {
-    cat(paste("Searching for neighbouring plots within", uniqueN(coord[[strata]]), "strata:\n"))
     coord[, (strata) := as.character(.SD[[1]]), .SDcols = strata]
 
     coord <- coord[order(get(strata), decreasing = FALSE, na.last = FALSE)]
