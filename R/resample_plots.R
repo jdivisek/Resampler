@@ -150,22 +150,26 @@ resample_plots <- function(coord, spec, longlat = FALSE, dist.threshold = 1000,
 
   # --- 2. Prepare data ---
   set.seed(seed)
-  coord <- coord[sample(1:nrow(coord)), ]
+  coord <- coord[sample.int(nrow(coord))] #makes a copy of coord in memory
 
-  if(remove == "less diverse"){
-    coord <- coord[order(spec[, .N, by = PlotObservationID][coord, x.N, on = "PlotObservationID"], decreasing = FALSE, na.last = FALSE)]}
-  if(remove == "more diverse"){
-    coord <- coord[order(spec[, .N, by = PlotObservationID][coord, x.N, on = "PlotObservationID"], decreasing = TRUE, na.last = FALSE)]}
-  if(remove == "lower value"){
-    coord <- coord[order(get(decision.variable), decreasing = FALSE, na.last = FALSE)]}
-  if(remove == "higher value"){
-    coord <- coord[order(get(decision.variable), decreasing = TRUE, na.last = FALSE)]}
+  if (remove %chin% c("less diverse", "more diverse")) {
+
+    coord[spec[, .N, by = PlotObservationID], temp_div := i.N, on = "PlotObservationID"]
+    setorderv(coord, cols = "temp_div",
+              order = if (remove == "less diverse") 1L else -1L,
+              na.last = FALSE)
+    set(coord, j = "temp_div", value = NULL)
+
+  } else if (remove %chin% c("lower value", "higher value")) {
+
+    setorderv(coord, cols = decision.variable,
+              order = if (remove == "lower value") 1L else -1L,
+              na.last = FALSE)
+  }
 
   # --- 3. Indentification of neighbouring plots ---
   if (!is.null(strata)) {
-    coord[, (strata) := as.character(.SD[[1]]), .SDcols = strata]
-
-    coord <- coord[order(get(strata), decreasing = FALSE, na.last = FALSE)]
+    setorderv(coord, cols = strata, order = 1L, na.last = FALSE)
 
     pb_id <- cli::cli_progress_bar("Searching for neighbouring plots within strata", total = uniqueN(coord[[strata]]))
     d <- coord[, {
