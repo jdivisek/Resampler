@@ -167,22 +167,31 @@ resample_plots <- function(coord, spec, longlat = FALSE, dist.threshold = 1000,
               na.last = FALSE)
   }
 
-  # --- 3. Indentification of neighbouring plots ---
+  # --- 3. Identification of neighboring plots ---
   if (!is.null(strata)) {
+    cli::cli_alert_info("Identification of neighboring plots...")
+
     setorderv(coord, cols = strata, order = 1L, na.last = FALSE)
 
-    pb_id <- cli::cli_progress_bar("Searching for neighbouring plots within strata", total = uniqueN(coord[[strata]]))
+    pb_id <- cli::cli_progress_bar(name = "Searching within",
+                                   total = uniqueN(coord[[strata]]),
+                                   clear = TRUE,
+                                   format = "{cli::pb_name}{cli::pb_total} strata {cli::pb_bar} {cli::pb_percent} [{cli::pb_elapsed_clock}]")
+
     d <- coord[, {
       cli::cli_progress_update(id = pb_id)
       data.table(NB = dnearneigh_strat(x = as.matrix(.SD), row.names = .I,
                                        d1 = 0, d2 = dist.threshold, longlat = longlat))},
       by = strata, .SDcols = 2:3]
+
     cli::cli_progress_done(id = pb_id)
+    cli::cli_alert_success("Done!")
 
     d <- d$NB
   } else {
-    cat("Searching for neighbouring plots. Please wait...\n")
+    cli::cli_alert_info("Identification of neighboring plots...")
     d <- spdep::dnearneigh(as.matrix(coord[, 2:3]), d1 = 0, d2 = dist.threshold, bounds = c("GE", "LT"), longlat = longlat)
+    cli::cli_alert_success("Done!")
   }
 
   ##set new ids based on ordered coord
@@ -201,7 +210,13 @@ resample_plots <- function(coord, spec, longlat = FALSE, dist.threshold = 1000,
   d <- d[g$membership %in% which(g$csize > 1)]
 
   ##resampling with 'cli' progressbar
-  pb_id <- cli::cli_progress_bar("Similarity-based resampling", total = uniqueN(spec$temp_grp, na.rm = TRUE))
+  cli::cli_alert_info("Similarity-based resampling...")
+
+  pb_id <- cli::cli_progress_bar(name = "Iterating over",
+                                 total = uniqueN(spec$temp_grp, na.rm = TRUE),
+                                 clear = FALSE,
+                                 format = "{cli::pb_name}{cli::pb_total} groups {cli::pb_bar} {cli::pb_percent} [{cli::pb_elapsed_clock}]",
+                                 format_done = "{cli::col_green(cli::symbol$tick)} Resampling completed successfully!")
 
   blacklist <- spec[!is.na(temp_grp), {
     cli::cli_progress_update(id = pb_id)
@@ -215,9 +230,15 @@ resample_plots <- function(coord, spec, longlat = FALSE, dist.threshold = 1000,
 
   coord.filtered <- coord[-blacklist$V1, 1:3]
 
-  cat(sprintf("Removed %.1f%% of plots (%d out of %d)\n", nrow(blacklist) / nrow(coord) * 100, nrow(blacklist), nrow(coord)))
-  end_time <- Sys.time(); elapsed <- as.numeric(difftime(end_time, start_time, units = "secs"))
-  cat(sprintf("Elapsed time %02d:%02d:%02d\n", floor(elapsed / 3600), floor((elapsed %% 3600) / 60), round(elapsed %% 60)))
+  n_rem <- nrow(blacklist); n_tot <- nrow(coord)
+  elapsed <- as.integer(round(as.numeric(difftime(Sys.time(), start_time, units = "secs"))))
+
+  days <- elapsed %/% 86400
+  time_str <- sprintf("%02d:%02d:%02d", (elapsed %% 86400) %/% 3600, (elapsed %% 3600) %/% 60, elapsed %% 60)
+  if (days > 0) time_str <- sprintf("%d d %s", days, time_str)
+
+  cli::cli_alert_info("Removed {.strong {sprintf('%.1f%%', n_rem / n_tot * 100)}} of plots ({.val {n_rem}} out of {.val {n_tot}})")
+  cli::cli_alert_info("Process finished in {.strong {time_str}}")
 
   return(coord.filtered)
 }
