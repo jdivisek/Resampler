@@ -173,12 +173,13 @@ resample_plots <- function(coord, spec, longlat = FALSE, dist.threshold = 1000,
     setorderv(coord, cols = strata, order = 1L, na.last = FALSE)
 
     pb_id <- cli::cli_progress_bar(name = "Searching for neighbors within strata:",
-                                   total = uniqueN(coord[[strata]]),
-                                   clear = TRUE,
-                                   format = "{cli::pb_name} {cli::pb_bar} {cli::pb_percent} ({cli::pb_current}/{cli::pb_total})")
+                                   total = nrow(coord),
+                                   clear = FALSE,
+                                   format = "{cli::pb_name} {cli::pb_bar} {cli::pb_percent} ({cli::pb_current}/{cli::pb_total})",
+                                   format_done = "{cli::col_green(cli::symbol$tick)} Neighbors identified successfully!")
 
     d <- coord[, {
-      cli::cli_progress_update(id = pb_id)
+      cli::cli_progress_update(inc = .N, id = pb_id)
       data.table(NB = dnearneigh_strat(x = as.matrix(.SD), row.names = .I,
                                        d1 = 0, d2 = dist.threshold, longlat = longlat))},
       by = strata, .SDcols = 2:3]
@@ -208,14 +209,14 @@ resample_plots <- function(coord, spec, longlat = FALSE, dist.threshold = 1000,
   ##resampling with 'cli' progressbar
   cli::cli_alert_info("Similarity-based resampling...")
 
-  pb_id <- cli::cli_progress_bar(name = "Iterating over plot groups:",
-                                 total = uniqueN(spec$temp_grp, na.rm = TRUE),
+  pb_id <- cli::cli_progress_bar(name = "Iterating over neigboring plots:",
+                                 total = uniqueN(spec[!is.na(temp_grp), PlotObservationID]),
                                  clear = FALSE,
                                  format = "{cli::pb_name} {cli::pb_bar} {cli::pb_percent} ({cli::pb_current}/{cli::pb_total})",
                                  format_done = "{cli::col_green(cli::symbol$tick)} Resampling completed successfully!")
 
   blacklist <- spec[!is.na(temp_grp), {
-    cli::cli_progress_update(id = pb_id)
+    cli::cli_progress_update(inc = uniqueN(.SD[["PlotObservationID"]]), id = pb_id)
     filtering_task(.SD, d, sim.threshold, sim.method, inclusive)},
     by = .(temp_grp),
     .SDcols = PlotObservationID:temp_grp]
