@@ -209,7 +209,7 @@ resample_plots <- function(coord, spec, longlat = FALSE, dist.threshold = 1000,
   ##resampling with 'cli' progressbar
   cli::cli_alert_info("Similarity-based resampling...")
 
-  pb_id <- cli::cli_progress_bar(name = "Iterating over neigboring plots:",
+  pb_id <- cli::cli_progress_bar(name = "Iterating over neighboring plots:",
                                  total = uniqueN(spec[!is.na(temp_grp), PlotObservationID]),
                                  clear = FALSE,
                                  format = "{cli::pb_name} {cli::pb_bar} {cli::pb_percent} ({cli::pb_current}/{cli::pb_total})",
