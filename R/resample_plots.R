@@ -225,7 +225,9 @@ resample_plots <- function(coord, spec, longlat = FALSE, dist.threshold = 1000,
 
   # --- 5. Return selected plots ---
 
-  coord.filtered <- coord[-blacklist$V1, 1:3]
+  if(nrow(blacklist)>0){
+    coord.filtered <- coord[-blacklist$V1, 1:3]
+  } else {coord.filtered <- coord[, 1:3]}
 
   n_rem <- nrow(blacklist); n_tot <- nrow(coord)
   elapsed <- as.integer(round(as.numeric(difftime(Sys.time(), start_time, units = "secs"))))
