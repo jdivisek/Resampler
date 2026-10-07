@@ -5,4 +5,5 @@
 #' @importFrom igraph graph_from_adj_list components
 #' @importFrom Matrix sparseMatrix
 #' @importFrom vegan betadiver vegdist
+#' @importFrom dbscan frNN
 "_PACKAGE"

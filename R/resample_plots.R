@@ -188,7 +188,8 @@ resample_plots <- function(coord, spec, longlat = FALSE, dist.threshold = 1000,
 
     d <- d$NB
   } else {
-    d <- spdep::dnearneigh(as.matrix(coord[, 2:3]), d1 = 0, d2 = dist.threshold, bounds = c("GE", "LT"), longlat = longlat)
+    d <- suppressWarnings(spdep::dnearneigh(as.matrix(coord[, 2:3]), d1 = 0, d2 = dist.threshold,
+                                            bounds = c("GE", "LT"), longlat = longlat, use_kd_tree=TRUE))
   }
 
   ##set new ids based on ordered coord
