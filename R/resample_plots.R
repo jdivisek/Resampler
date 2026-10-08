@@ -182,7 +182,7 @@ resample_plots <- function(coord, spec, longlat = FALSE, dist.threshold = 1000,
       cli::cli_progress_update(inc = .N, id = pb_id)
       data.table(NB = dnearneigh_strat(x = as.matrix(.SD), row.names = .I,
                                        d1 = 0, d2 = dist.threshold, longlat = longlat))},
-      by = strata, .SDcols = 2:3]
+      by = strata, .SDcols = 2:3, showProgress = FALSE]
 
     cli::cli_progress_done(id = pb_id)
 
@@ -205,10 +205,15 @@ resample_plots <- function(coord, spec, longlat = FALSE, dist.threshold = 1000,
 
   d <- mapply(append, seq_along(d), d, SIMPLIFY = FALSE, USE.NAMES = FALSE)
   names(d) <- coord[,.I]
+  max_group <- sum(lengths(d[g$membership == which.max(g$csize)], use.names = F))
   d <- d[g$membership %in% which(g$csize > 1)]
 
   ##resampling with 'cli' progressbar
   cli::cli_alert_info("Similarity-based resampling...")
+
+  if(max_group > 1e+07){
+    cli::cli_alert_warning(paste("The largest group contains", format(max_group, big.mark = " ", scientific = FALSE), "neighbors. Resampling may take a long time."))
+  }
 
   pb_id <- cli::cli_progress_bar(name = "Iterating over neighboring plots:",
                                  total = uniqueN(spec[!is.na(temp_grp), PlotObservationID]),
@@ -220,7 +225,7 @@ resample_plots <- function(coord, spec, longlat = FALSE, dist.threshold = 1000,
     cli::cli_progress_update(inc = uniqueN(.SD[["PlotObservationID"]]), id = pb_id)
     filtering_task(.SD, d, sim.threshold, sim.method, inclusive)},
     by = .(temp_grp),
-    .SDcols = PlotObservationID:temp_grp]
+    .SDcols = PlotObservationID:temp_grp, showProgress = FALSE]
 
   cli::cli_progress_done(id = pb_id)
 
